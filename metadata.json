@@ -1,0 +1,6 @@
+{
+  "name": "SuaraStudio — Studio Sintesis Suara & Sutradara Vokal AI",
+  "description": "Studio rekaman dan desain suara AI ekspresif berbahasa Indonesia menggunakan Gemini 3.8 Flash TTS untuk narasi sinematik, artikulasi angka presisi, dan dialog multi-karakter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
