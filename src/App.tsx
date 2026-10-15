@@ -11,6 +11,8 @@ import {
   FULL_USER_SCRIPT,
   FULL_SCRIPT_DEFAULT_STYLE,
 } from "./data/presets";
+import { BackendSettingsModal } from "./components/BackendSettingsModal";
+import { getApiUrl } from "./utils/apiConfig";
 import {
   CloudRain,
   Zap,
@@ -27,6 +29,7 @@ export default function App() {
   const [takes, setTakes] = useState<GeneratedTake[]>([]);
   const [activeTake, setActiveTake] = useState<GeneratedTake | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [isServerModalOpen, setIsServerModalOpen] = useState(false);
 
   // Procedural Web Audio Ambient Rain & Distant Thunder
   const atmosphereRef = useRef<MidnightRainAtmosphere | null>(null);
@@ -78,7 +81,7 @@ export default function App() {
     setIsSynthesizing(true);
 
     try {
-      const res = await fetch("/api/tts/single", {
+      const res = await fetch(getApiUrl("/api/tts/single"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -136,6 +139,7 @@ export default function App() {
         takesCount={takes.length}
         onQuickSynthesize={handleQuickSynthesize}
         isSynthesizing={isSynthesizing}
+        onOpenServerSettings={() => setIsServerModalOpen(true)}
       />
 
       {/* Hero Studio Banner */}
@@ -284,6 +288,11 @@ export default function App() {
           </div>
         </div>
       </footer>
+      {/* Backend Settings Modal */}
+      <BackendSettingsModal
+        isOpen={isServerModalOpen}
+        onClose={() => setIsServerModalOpen(false)}
+      />
     </div>
   );
 }

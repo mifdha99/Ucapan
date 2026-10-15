@@ -16,6 +16,7 @@ import {
   VoiceOption,
   GeneratedTake,
 } from "../data/presets";
+import { getApiUrl, formatBackendErrorMessage } from "../utils/apiConfig";
 import { WaveformPlayer } from "./WaveformPlayer";
 
 interface FullScriptStudioProps {
@@ -88,7 +89,7 @@ export const FullScriptStudio: React.FC<FullScriptStudioProps> = ({
     setErrorMessage(null);
 
     try {
-      const res = await fetch("/api/tts/single", {
+      const res = await fetch(getApiUrl("/api/tts/single"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -124,8 +125,7 @@ export const FullScriptStudio: React.FC<FullScriptStudioProps> = ({
 
       onTakeGenerated(take);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses.";
+      const msg = formatBackendErrorMessage(err);
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);

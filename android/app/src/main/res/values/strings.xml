@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SuaraStudio</string>
+    <string name="error_title">Gagal Memuat SuaraStudio</string>
+    <string name="error_desc">Aplikasi mengalami kendala saat memuat antarmuka. Silakan periksa koneksi internet Anda dan coba lagi.</string>
+    <string name="retry_button">Muat Ulang Halaman</string>
+    <string name="loading_hint">Menyiapkan studio suara AI...</string>
+</resources>

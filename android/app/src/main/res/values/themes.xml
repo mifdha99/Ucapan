@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SuaraStudio" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand colors -->
+        <item name="colorPrimary">@color/studio_accent</item>
+        <item name="colorPrimaryVariant">@color/studio_surface</item>
+        <item name="colorOnPrimary">#0B0F17</item>
+
+        <!-- Status bar and window background: dark studio theme prevents white flash -->
+        <item name="android:statusBarColor">@color/studio_bg</item>
+        <item name="android:navigationBarColor">@color/studio_bg</item>
+        <item name="android:windowBackground">@color/studio_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

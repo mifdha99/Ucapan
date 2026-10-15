@@ -9,6 +9,7 @@ interface TopBarProps {
   takesCount: number;
   onQuickSynthesize: () => void;
   isSynthesizing: boolean;
+  onOpenServerSettings: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -19,6 +20,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   takesCount,
   onQuickSynthesize,
   isSynthesizing,
+  onOpenServerSettings,
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-[#0B0F17]/90 backdrop-blur-md border-b border-slate-800">
@@ -89,7 +91,23 @@ export const TopBar: React.FC<TopBarProps> = ({
         </nav>
 
         {/* Zone 3: 1 Primary Action & Ambience Toggle */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
+          {/* Server Settings button */}
+          <button
+            type="button"
+            onClick={onOpenServerSettings}
+            className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800 rounded-lg transition-colors"
+            title="Pengaturan Server Backend AI"
+          >
+            <span className="sr-only">Pengaturan Server</span>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="8" x="2" y="2" rx="2" ry="2"/>
+              <rect width="20" height="8" x="2" y="14" rx="2" ry="2"/>
+              <line x1="6" x2="6.01" y1="6" y2="6"/>
+              <line x1="6" x2="6.01" y1="18" y2="18"/>
+            </svg>
+          </button>
+
           {/* Ambient Rain & Distant Thunder soundscape button */}
           <button
             type="button"

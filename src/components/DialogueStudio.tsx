@@ -15,6 +15,7 @@ import {
   GeneratedTake,
   VoiceOption,
 } from "../data/presets";
+import { getApiUrl, formatBackendErrorMessage } from "../utils/apiConfig";
 import { WaveformPlayer } from "./WaveformPlayer";
 
 interface DialogueStudioProps {
@@ -73,7 +74,7 @@ export const DialogueStudio: React.FC<DialogueStudioProps> = ({
     setErrorMessage(null);
 
     try {
-      const res = await fetch("/api/tts/dialogue", {
+      const res = await fetch(getApiUrl("/api/tts/dialogue"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -115,8 +116,7 @@ export const DialogueStudio: React.FC<DialogueStudioProps> = ({
 
       onTakeGenerated(take);
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses.";
+      const msg = formatBackendErrorMessage(err);
       setErrorMessage(msg);
     } finally {
       setIsLoading(false);

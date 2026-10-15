@@ -21,6 +21,7 @@ import {
   GeneratedTake,
   VoiceOption,
 } from "../data/presets";
+import { getApiUrl, formatBackendErrorMessage } from "../utils/apiConfig";
 import { WaveformPlayer } from "./WaveformPlayer";
 
 interface SegmentDirectorProps {
@@ -60,7 +61,7 @@ export const SegmentDirector: React.FC<SegmentDirectorProps> = ({
     setErrorMessage(null);
 
     try {
-      const res = await fetch("/api/tts/single", {
+      const res = await fetch(getApiUrl("/api/tts/single"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,8 +104,7 @@ export const SegmentDirector: React.FC<SegmentDirectorProps> = ({
         onPlayAmbientForSegment(true);
       }
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : "Terjadi kesalahan saat memproses.";
+      const msg = formatBackendErrorMessage(err);
       setErrorMessage(msg);
     } finally {
       setLoadingSegmentId(null);
@@ -118,7 +118,7 @@ export const SegmentDirector: React.FC<SegmentDirectorProps> = ({
     for (const segment of segments) {
       setLoadingSegmentId(segment.id);
       try {
-        const res = await fetch("/api/tts/single", {
+        const res = await fetch(getApiUrl("/api/tts/single"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
