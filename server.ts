@@ -65,10 +65,37 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // 1. Universal CORS middleware for Android APK and external web clients
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.header("Access-Control-Max-Age", "86400");
+
+    if (req.method === "OPTIONS") {
+      res.sendStatus(204);
+      return;
+    }
+    next();
+  });
+
   app.use(express.json({ limit: "10mb" }));
 
+  // Dedicated Health Check endpoint for Android APK connection testing
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({
+      status: "ok",
+      service: "SuaraStudio Gemini TTS Backend",
+      model: "gemini-3.8-flash-tts",
+      timestamp: new Date().toISOString(),
+    });
+  });
+
   // Single-speaker TTS endpoint using gemini-3.8-flash-tts
-  app.post("/api/tts/single", async (req, res) => {
+  const handleSingleTts = async (req: express.Request, res: express.Response) => {
     try {
       const { text, style, voiceName = "Kore" } = req.body as {
         text?: string;
@@ -149,6 +176,21 @@ async function startServer() {
           : "Terjadi kesalahan saat mensintesis suara.";
       res.status(500).json({ error: message });
     }
+  };
+
+  app.post("/api/tts/single", handleSingleTts);
+  app.post("/api/tts", handleSingleTts);
+
+  app.get("/api", (_req, res) => {
+    res.json({
+      status: "online",
+      service: "SuaraStudio Gemini TTS Backend",
+      endpoints: {
+        single: "/api/tts/single",
+        dialogue: "/api/tts/dialogue",
+        health: "/api/health",
+      },
+    });
   });
 
   // Dual-speaker dialogue TTS endpoint using gemini-3.8-flash-tts

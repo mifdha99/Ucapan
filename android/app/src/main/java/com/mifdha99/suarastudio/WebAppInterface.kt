@@ -8,6 +8,10 @@ class WebAppInterface(private val context: Context) {
 
     private val prefs = context.getSharedPreferences("SuaraStudioPrefs", Context.MODE_PRIVATE)
 
+    companion object {
+        const val DEFAULT_BACKEND_URL = "https://echosoul-ai.ai.studio"
+    }
+
     @JavascriptInterface
     fun isAndroidApp(): Boolean {
         return true
@@ -15,12 +19,13 @@ class WebAppInterface(private val context: Context) {
 
     @JavascriptInterface
     fun getBackendUrl(): String {
-        return prefs.getString("backend_url", "") ?: ""
+        return prefs.getString("backend_url", DEFAULT_BACKEND_URL) ?: DEFAULT_BACKEND_URL
     }
 
     @JavascriptInterface
     fun setBackendUrl(url: String) {
-        prefs.edit().putString("backend_url", url.trim()).apply()
+        val target = if (url.trim().isEmpty()) DEFAULT_BACKEND_URL else url.trim()
+        prefs.edit().putString("backend_url", target).apply()
     }
 
     @JavascriptInterface

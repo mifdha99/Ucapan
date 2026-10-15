@@ -7,12 +7,15 @@ import {
   RefreshCw,
   ShieldCheck,
   Smartphone,
-  ExternalLink,
+  Sparkles,
+  Link2,
 } from "lucide-react";
 import {
   getStoredBackendUrl,
   setStoredBackendUrl,
   checkBackendHealth,
+  normalizeBackendBaseUrl,
+  DEFAULT_AI_STUDIO_BACKEND_URL,
   isRunningInAndroid,
 } from "../utils/apiConfig";
 
@@ -32,17 +35,20 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
   const [testResult, setTestResult] = useState<{
     ok: boolean;
     message: string;
+    resolvedUrl?: string;
   } | null>(null);
   const isAndroid = isRunningInAndroid();
 
   useEffect(() => {
     if (isOpen) {
-      setUrl(getStoredBackendUrl());
+      setUrl(getStoredBackendUrl() || DEFAULT_AI_STUDIO_BACKEND_URL);
       setTestResult(null);
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const normalizedPreview = normalizeBackendBaseUrl(url);
 
   const handleTest = async () => {
     setIsTesting(true);
@@ -56,6 +62,11 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
     setStoredBackendUrl(url);
     if (onSaved) onSaved();
     onClose();
+  };
+
+  const handleUseDefault = () => {
+    setUrl(DEFAULT_AI_STUDIO_BACKEND_URL);
+    setTestResult(null);
   };
 
   return (
@@ -72,7 +83,7 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
                 Pengaturan Server Backend AI
               </h3>
               <p className="text-xs text-slate-400">
-                Koneksi Aman Gemini 3.8 Flash TTS
+                Koneksi HTTPS Gemini 3.8 Flash TTS
               </p>
             </div>
           </div>
@@ -91,12 +102,12 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
           <div className="p-3 bg-slate-900 border border-slate-800 rounded-xl space-y-1.5">
             <div className="flex items-center gap-2 font-medium text-slate-200">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Keamanan Kunci API (API Key Safety)</span>
+              <span>Keamanan Kunci API Server-Side</span>
             </div>
             <p className="text-slate-400 leading-relaxed">
-              Demi keamanan, kunci API Gemini tidak ditanam ke dalam file APK Android
-              agar tidak dapat diekstrak atau disalahgunakan pihak ketiga. Aplikasi
-              ini terhubung ke backend HTTPS yang menjalankan enkripsi server-side.
+              Kunci API Gemini tersimpan secara aman di server backend Google AI
+              Studio dan tidak ditanam ke dalam file APK Android demi mencegah
+              pembongkaran (*decompilation*).
             </p>
           </div>
 
@@ -109,21 +120,50 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
           )}
 
           {/* URL Input */}
-          <div className="space-y-1.5">
-            <label htmlFor="backend-url-input" className="font-semibold text-slate-300 block">
-              URL Backend HTTPS
-            </label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="backend-url-input"
+                className="font-semibold text-slate-300 block"
+              >
+                URL Backend HTTPS
+              </label>
+              <button
+                type="button"
+                onClick={handleUseDefault}
+                className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-medium"
+                title="Gunakan URL resmi yang dipublikasikan di Google AI Studio"
+              >
+                <Sparkles className="w-3 h-3" />
+                <span>Gunakan URL Resmi</span>
+              </button>
+            </div>
+
             <input
               id="backend-url-input"
-              type="url"
+              type="text"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://suarastudio-backend.your-domain.com"
+              placeholder="https://echosoul-ai.ai.studio"
               className="w-full px-3.5 py-2.5 bg-[#0B0F17] border border-slate-800 rounded-lg text-slate-100 placeholder-slate-600 focus:outline-hidden focus:border-amber-500 font-mono text-xs transition-colors"
             />
-            <p className="text-slate-500">
-              Kosongkan jika menggunakan server lokal / same-origin (saat dibuka via browser di laptop).
-            </p>
+
+            {/* Live Normalization Preview */}
+            <div className="p-2.5 bg-slate-900/90 border border-slate-800 rounded-lg space-y-1 text-slate-400">
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <Link2 className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-medium">URL Dasar Backend:</span>
+              </div>
+              <div className="font-mono text-amber-300 break-all select-all">
+                {normalizedPreview || "(URL belum diisi)"}
+              </div>
+              <p className="text-[11px] text-slate-500 pt-0.5">
+                Cukup masukkan URL domain dasar (contoh:{" "}
+                <span className="text-slate-400">https://echosoul-ai.ai.studio</span>
+                ). Sistem otomatis mengenali endpoint <span className="font-mono">/api/tts/single</span> dan{" "}
+                <span className="font-mono">/api/tts/dialogue</span>.
+              </p>
+            </div>
           </div>
 
           {/* Test Status feedback */}
@@ -140,7 +180,14 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
               ) : (
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-red-400" />
               )}
-              <div className="leading-relaxed">{testResult.message}</div>
+              <div className="leading-relaxed">
+                <p className="font-semibold">{testResult.message}</p>
+                {testResult.resolvedUrl && (
+                  <p className="font-mono text-[11px] opacity-80 mt-1">
+                    Target: {testResult.resolvedUrl}/api/health
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -150,10 +197,12 @@ export const BackendSettingsModal: React.FC<BackendSettingsModalProps> = ({
           <button
             type="button"
             onClick={handleTest}
-            disabled={isTesting}
+            disabled={isTesting || !url.trim()}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700/80 rounded-lg transition-colors disabled:opacity-50"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isTesting ? "animate-spin" : ""}`}
+            />
             <span>{isTesting ? "Memeriksa..." : "Uji Koneksi"}</span>
           </button>
 
