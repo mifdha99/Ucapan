@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupAssetLoader() {
         assetLoader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .addPathHandler("/Ucapan/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
     }
 

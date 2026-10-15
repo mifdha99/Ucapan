@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js (v20)
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -26,11 +26,11 @@ jobs:
         run: npm ci || npm install
 
       - name: Build Production Frontend (React + Vite)
-        run: npm run build
+        run: npx vite build --base=./
 
-      - name: Verify Frontend Dist Directory
+      - name: Verify Frontend Dist Output
         run: |
-          test -f dist/index.html || { echo "dist/index.html tidak ditemukan!"; exit 1; }
+          test -f dist/index.html || { echo "ERROR: dist/index.html tidak ditemukan!"; exit 1; }
           ls -la dist/
 
       - name: Setup Java JDK 17
@@ -38,37 +38,40 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Copy Frontend Assets to Android Project
         run: |
           mkdir -p android/app/src/main/assets/dist
+          mkdir -p android/app/src/main/assets/Ucapan
           cp -r dist/* android/app/src/main/assets/dist/
+          cp -r dist/* android/app/src/main/assets/Ucapan/
           ls -la android/app/src/main/assets/dist/
 
-      - name: Grant Execute Permission to gradlew
-        run: chmod +x android/gradlew
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Build Debug APK via Gradle
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Verify APK Generation
         run: |
           APK_PATH="android/app/build/outputs/apk/debug/app-debug.apk"
           if [ -f "$APK_PATH" ]; then
-            echo "APK berhasil dibangun di: $APK_PATH"
+            echo "SUCCESS: APK berhasil dibuat di $APK_PATH"
             ls -lh "$APK_PATH"
           else
-            echo "Gagal: Berkas APK tidak ditemukan di $APK_PATH"
+            echo "ERROR: File APK tidak ditemukan di $APK_PATH"
             exit 1
           fi
 
-      - name: Upload APK Artifact
+      - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: SuaraStudio-v1.0.0-debug
